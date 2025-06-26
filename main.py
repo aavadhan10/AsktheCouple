@@ -20,21 +20,39 @@ st.markdown("""
         }
         
         .stButton > button {
-            color: white;
-            background: linear-gradient(135deg, #d86f91 0%, #c2185b 100%);
-            border: none;
-            border-radius: 12px;
-            padding: 0.5rem 1.5rem;
+            color: #8b0000;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+            border: 1px solid #f48fb1;
+            border-radius: 20px;
+            padding: 8px 16px;
             font-weight: 500;
-            box-shadow: 0 2px 8px rgba(216, 111, 145, 0.3);
+            font-size: 0.85rem;
+            box-shadow: 0 2px 6px rgba(244, 143, 177, 0.2);
             transition: all 0.2s ease;
-            width: auto;
-            min-width: 120px;
+            width: 100%;
+            margin: 2px 0;
+            text-align: center;
+            white-space: normal;
+            height: auto;
+            min-height: 40px;
         }
         
         .stButton > button:hover {
+            background: linear-gradient(135deg, #f48fb1 0%, #d86f91 100%);
+            color: white;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(216, 111, 145, 0.4);
+            box-shadow: 0 4px 12px rgba(216, 111, 145, 0.3);
+        }
+        
+        /* Style the custom question button differently */
+        .stButton > button[kind="primary"] {
+            background: linear-gradient(135deg, #d86f91 0%, #c2185b 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            width: auto;
+            min-width: 120px;
         }
         
         .stSelectbox > div > div > div {
@@ -52,6 +70,8 @@ st.markdown("""
             border-color: #d86f91;
             box-shadow: 0 0 0 1px #d86f91;
         }
+        
+
         
         .wedding-header {
             text-align: center;
@@ -268,9 +288,10 @@ def main():
         st.stop()
     
     # Simplified single-column layout
-    st.subheader("💬 Ask Us Anything!")
+    st.subheader("💬 Quick Questions")
+    st.markdown("Click on any question below:")
     
-    # Simple dropdown with all questions
+    # Question list
     questions = [
         "When should I RSVP by?",
         "What is an Indian Wedding Puja Ceremony?",
@@ -290,17 +311,16 @@ def main():
         "What would you like to know that we haven't already covered?"
     ]
     
-    selected_question = st.selectbox(
-        "Choose a common question:",
-        ["Select a question..."] + questions,
-        help="Pick a question from our most frequently asked!"
-    )
+    # Create question bubbles using columns for layout
+    cols = st.columns(3)
     
-    if selected_question and selected_question != "Select a question...":
-        with st.spinner("💭 Getting your answer..."):
-            answer = get_openai_response(selected_question, context)
-            if answer:
-                display_answer(answer)
+    for i, question in enumerate(questions):
+        with cols[i % 3]:
+            if st.button(question, key=f"q_{i}", help="Click to get an answer!"):
+                with st.spinner("💭 Getting your answer..."):
+                    answer = get_openai_response(question, context)
+                    if answer:
+                        display_answer(answer)
     
     # Custom question section
     st.markdown("---")
