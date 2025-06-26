@@ -23,21 +23,34 @@ st.markdown("""
             color: white;
             background: linear-gradient(135deg, #d86f91 0%, #c2185b 100%);
             border: none;
-            border-radius: 25px;
-            padding: 0.6rem 2rem;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(216, 111, 145, 0.3);
-            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(216, 111, 145, 0.3);
+            transition: all 0.2s ease;
+            width: auto;
+            min-width: 120px;
         }
         
         .stButton > button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(216, 111, 145, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(216, 111, 145, 0.4);
         }
         
         .stSelectbox > div > div > div {
             color: #8b0000;
             font-weight: 500;
+        }
+        
+        .stTextInput > div > div > input {
+            border-radius: 8px;
+            border: 2px solid #f0f0f0;
+            transition: border-color 0.2s ease;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            border-color: #d86f91;
+            box-shadow: 0 0 0 1px #d86f91;
         }
         
         .wedding-header {
@@ -254,89 +267,56 @@ def main():
     if not context:
         st.stop()
     
-    # Create two columns for better layout
-    col1, col2 = st.columns([2, 1])
+    # Simplified single-column layout
+    st.subheader("💬 Ask Us Anything!")
     
-    with col1:
-        st.subheader("🎯 Quick Questions")
-        
-        # Enhanced question list with categories
-        questions = {
-            "📅 Event Details": [
-                "When should I RSVP by?",
-                "Is this the real wedding?",
-                "Are there any other events around the wedding?",
-                "What's the weather going to be like?"
-            ],
-            "🎭 Cultural & Traditions": [
-                "What is an Indian Wedding Puja Ceremony?",
-                "Will there be other Cultural Traditions?",
-                "Can I wear Indian Attire?"
-            ],
-            "👗 Dress Code & Attire": [
-                "Is there a dress code?",
-                "Can I Wear Heels?"
-            ],
-            "🍽️ Food & Logistics": [
-                "I have a food allergy, can I make a special request?",
-                "Is there parking for the Wedding?",
-                "Are kids welcome?",
-                "Can I bring a plus one?"
-            ],
-            "🎁 Gifts & Accommodation": [
-                "Are you registered? Where?",
-                "Do you have any hotel recommendations?"
-            ],
-            "❓ Other": [
-                "What would you like to know that we haven't already covered?"
-            ]
-        }
-        
-        # Flatten questions for selectbox
-        all_questions = []
-        for category, q_list in questions.items():
-            all_questions.extend(q_list)
-        
-        selected_question = st.selectbox(
-            "Choose a question or browse by category:",
-            [""] + all_questions,
-            help="Select a common question to get instant answers!"
-        )
-        
-        if selected_question:
-            with st.spinner("💭 Thinking..."):
-                answer = get_openai_response(selected_question, context)
-                if answer:
-                    display_answer(answer)
+    # Simple dropdown with all questions
+    questions = [
+        "When should I RSVP by?",
+        "What is an Indian Wedding Puja Ceremony?",
+        "Is this the real wedding?",
+        "Is there a dress code?",
+        "Can I wear Indian Attire?",
+        "Are you registered? Where?",
+        "Can I Wear Heels?",
+        "Can I bring a plus one?",
+        "Are there any other events around the wedding?",
+        "I have a food allergy, can I make a special request?",
+        "Is there parking for the Wedding?",
+        "Are kids welcome?",
+        "Will there be other Cultural Traditions?",
+        "Do you have any hotel recommendations?",
+        "What's the weather going to be like?",
+        "What would you like to know that we haven't already covered?"
+    ]
     
-    with col2:
-        st.subheader("📝 Categories")
-        for category, q_list in questions.items():
-            with st.expander(category):
-                for q in q_list:
-                    if st.button(q, key=f"btn_{q}"):
-                        with st.spinner("💭 Getting your answer..."):
-                            answer = get_openai_response(q, context)
-                            if answer:
-                                display_answer(answer)
+    selected_question = st.selectbox(
+        "Choose a common question:",
+        ["Select a question..."] + questions,
+        help="Pick a question from our most frequently asked!"
+    )
+    
+    if selected_question and selected_question != "Select a question...":
+        with st.spinner("💭 Getting your answer..."):
+            answer = get_openai_response(selected_question, context)
+            if answer:
+                display_answer(answer)
     
     # Custom question section
     st.markdown("---")
-    st.subheader("✍️ Ask Your Own Question")
+    st.subheader("✍️ Have Something Else in Mind?")
     
-    with st.form("custom_question_form", clear_on_submit=True):
-        user_question = st.text_area(
-            "Type your question here:",
-            placeholder="e.g., What time does the ceremony start?",
-            height=100
-        )
-        submit_button = st.form_submit_button("Ask Question 🤔")
-        
-        if submit_button and user_question:
-            with st.spinner("💭 Finding the perfect answer for you..."):
-                answer = get_openai_response(user_question, context)
-                if answer:
-                    display_answer(answer)
+    user_question = st.text_input(
+        "Type your own question:",
+        placeholder="e.g., What time does the ceremony start?",
+        help="Ask us anything about the wedding!"
+    )
+    
+    if st.button("Ask Question", type="primary") and user_question:
+        with st.spinner("💭 Finding the perfect answer for you..."):
+            answer = get_openai_response(user_question, context)
+            if answer:
+                display_answer(answer)
 
     # Footer
     st.markdown("---")
