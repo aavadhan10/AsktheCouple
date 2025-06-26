@@ -93,16 +93,58 @@ st.markdown("""
 # --- Functions ---
 @st.cache_data
 def load_wedding_context() -> str:
-    """Load wedding information from file with error handling."""
-    try:
-        with open("ankita_solomon_wedding_info.txt", "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        st.error("Wedding information file not found. Please contact the wedding hosts.")
-        return ""
-    except Exception as e:
-        st.error(f"Error loading wedding information: {str(e)}")
-        return ""
+    """Load wedding information with all the details."""
+    return """
+    Solomon Demmessie and Ankita Avadhani Wedding
+    June 21, 2025 - Palo Alto, California
+    
+    SCHEDULE:
+    - Welcome and Arrival: 2:15 pm - 2:30 pm at Ankita's Childhood Backyard, 733 Center Drive, Palo Alto, CA 94301
+    - Baraat & Refreshments: 2:30 pm - 4:00 pm - Join us for the Baraat — a joyful wedding procession where we dance and celebrate as the groom makes his grand entrance!
+    - Indian Puja Wedding Ceremony: 4:00 pm - 6:00 pm - Traditional Indian ritual led by a guru (Indian Priest), filled with meaningful prayers and blessings
+    - Dinner and Dancing: 6:00 pm - 10:00 pm - Indian dishes, cocktails, cake cutting, and DJ
+    
+    WEDDING INFORMATION:
+    
+    RSVP: ASAP (April 2025)
+    
+    Indian Puja Ceremony: A traditional Indian ritual led by a guru (Indian Priest), filled with meaningful prayers and blessings. During the ceremony, the guru will guide us in offering flowers, fruits, and prayers to the deities while chanting mantras to invoke prosperity and happiness. You'll see us light a sacred fire, which symbolizes purity and new beginnings. It's a peaceful and joyous tradition. We will have descriptions of each part of the ceremony for you at the Wedding.
+    
+    Is this the real wedding: To us, yes! We want to celebrate with a traditional Indian ceremony surrounded by you all and will get legally married at the courthouse. We're planning a large reception and big party in 2026.
+    
+    Dress Code: 
+    - American Semi-Formal: Tuxes and gowns are welcome, and so are suits and cocktail dresses
+    - Indian Semi-Formal: sarees, lehenga cholis, or salwar kameez, and kurtas or Nehru jackets with trousers
+    - Bright colors and light fabrics are perfect for the occasion. July is typically a very warm month in California (with high's of 90) so dress light!
+    
+    Indian Attire: Yes! You can wear Indian attire. American Semi-Formal Inspiration: https://www.pinterest.com/kimberlygarz/semi-formal-wedding-attire/ 
+    Indian Semi-Formal Inspiration: https://in.pinterest.com/shaadiwish/summer-wedding-outfits/
+    If you're interested in wearing Indian attire, this website https://www.saree.com/ offers options with U.S. shipping. Please order 2-3 months in advance to ensure timely delivery or talk to Ankita about borrowing outfits if desired!
+    
+    Registry: We are not registered, as your presence is truly the best gift we could ask for. We're just excited to celebrate this special day with our loved ones!
+    
+    Heels: Yes! Luckily we have no grass in our backyard so feel free to wear whatever shoes you feel comfortable with!
+    
+    Plus One: We're keeping the celebration intimate with just close family and friends, so all invited guests will have their names listed on the invite. We appreciate your understanding!
+    
+    Other Events: Just this event! We are excited to have our larger party in 2026 and appreciate all of you taking the time to come to our small backyard wedding.
+    
+    Food Allergies: Absolutely! We will have a full vegetarian menu but will accommodate for all allergies. We will have dairy-free, gluten-free and nut-free options but please feel free to reach out with any requests!
+    
+    Parking: There will be limited street parking available as the wedding is in a small residential area. Center Drive requires a permit for street parking, but you can find parking on Forest Avenue (which runs perpendicular to Center Drive) without a permit. We recommend arriving a bit early to secure a spot!
+    
+    Kids: Yes! Since this is a small, family event, please bring your kids!
+    
+    Cultural Traditions: For this celebration, we'll be focusing on the Indian puja and wedding ceremony. Our larger reception in 2026 will blend both Habesha and Western traditions, along with diverse cuisine and more festivities.
+    
+    Hotels: We've put together a list of affordable recommended hotels within 20 minutes of the venue:
+    - Courtyard Redwood City Marriott: 600 Bair Island Rd, Redwood City, CA 94063 (~10 Minute Drive to Ankita's House)
+    We recommend Ubering to and from hotels to Ankita's House.
+    
+    Weather: Hot! July is an extremely hot month in California with temps up to 90 degrees! While we have a shaded backyard, we encourage everyone to dress colorfully and lightly to accommodate the heat!
+    
+    About the Ceremony: This will be an intimate ceremony with just Solomon and Ankita's closest friends and family. The puja is a sacred Indian ritual performed to invoke blessings, prosperity, and happiness as we begin this new chapter together. The ceremony includes prayers, offerings, and beautiful customs. While it's rooted in Indian tradition, it's a heartfelt and welcoming event for all to enjoy.
+    """
 
 def get_openai_response(prompt: str, context: str) -> Optional[str]:
     """Get response from OpenAI with error handling and retry logic."""
@@ -294,4 +336,3 @@ if 'initialized' not in st.session_state:
 
 if __name__ == "__main__":
     main()
-
