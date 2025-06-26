@@ -1,99 +1,101 @@
 import streamlit as st
 import openai
 
-# --- Configuration ---
-st.set_page_config(page_title="AskTheCouple Wedding Bot 💍", page_icon="💐")
+st.set_page_config(page_title="AskTheCouple 💛", page_icon="💍", layout="centered")
 
-st.markdown("""
-    <style>
-        .main {background-color: #fff0f5;}
-        .stButton>button {color: white; background-color: #d86f91; border-radius: 12px;}
-        .stSelectbox>div>div>div {color: #8b0000;}
-    </style>
-""", unsafe_allow_html=True)
+# Load API key from secrets
+openai.api_key = st.secrets["openai"]["api_key"]
 
-# --- Title ---
-st.title("💌 Welcome to AskTheCouple!")
-st.markdown("Hi there, and welcome to our wedding Q&A space — just for our guests!\nI'm your personal Wedding Helper Bot 🤖\n\nGot a question about what to wear, where to park, or what this whole Puja thing is? You're in the right place 💛")
+# Full wedding info (from your message)
+wedding_info = """
+🗓️ EVENT SCHEDULE — SATURDAY, JUNE 21, 2025
 
-# --- OpenAI Setup ---
-openai.api_key = st.secrets.get("OPENAI_API_KEY", "sk-REPLACE_THIS_WITH_YOURS")
+📍 Location: 733 Center Drive, Palo Alto, CA 94301 (Ankita’s childhood backyard)
 
-# --- Dropdown Menu of Common Questions ---
+Welcome & Arrival (2:15 pm – 2:30 pm): Guests arrive. Light bites and cocktails.  
+Baraat & Refreshments (2:30 pm – 4:00 pm): Joyful groom's entrance + snacks.  
+Indian Puja Wedding Ceremony (4:00 pm – 6:00 pm): Traditional ritual with a priest, fire, chanting, offerings.  
+Dinner & Dancing (6:00 pm – 10:00 pm): Indian food, cocktails, cake, DJ & dancing!
+
+👗 DRESS CODE:  
+– American Semi-Formal: Tuxes, suits, cocktail dresses  
+– Indian Semi-Formal: Sarees, lehengas, kurtas, Nehru jackets  
+🌞 Dress light, July gets hot (~90°F).  
+👠 Heels welcome — no grass!
+
+🧒 Kids welcome  
+🎁 No registry — your presence is the gift!  
+🥘 Menu: Fully vegetarian, gluten/dairy/nut-free options available. Notify us of any allergies.  
+🚗 Parking: Forest Ave = free, Center Drive = permit-only  
+🌍 2026 will include Habesha + Western culture
+
+FAQs:
+– RSVP by: April 2025  
+– Indian Ceremony: A peaceful, spiritual blessing with mantras, fire, flowers, etc. Inclusive for all.  
+– This is our real wedding — legal one is separate. Reception in 2026.  
+– Can I wear Indian attire? Yes! [saree.com] ships to U.S. or borrow from Ankita.  
+– Registry? No!  
+– Can I wear heels? Yes!  
+– Plus ones? Only if invited (intimate event)  
+– Other events? Nope, just this one!  
+– Food allergies? Let us know — we’ll accommodate.  
+– Kids? Yes!  
+– Other cultures? 2026 event will be multicultural  
+– Hotel info? See ‘Travel’ tab on website  
+– Weather? Hot! Dress light and colorful.
+"""
+
+# List of button questions
 questions = [
-    "When should I RSVP by?",
-    "What is an Indian Wedding Puja Ceremony?",
-    "Is this the real wedding?",
-    "Is there a dress code?",
-    "Can I wear Indian Attire?",
-    "Are you registered? Where?",
-    "Can I Wear Heels?",
-    "Can I bring a plus one?",
-    "Are there any other events around the wedding?",
-    "I have a food allergy, can I make a special request?",
-    "Is there parking for the Wedding?",
-    "Are kids welcome?",
-    "Will there be other Cultural Traditions?",
-    "Do you have any hotel recommendations?",
-    "What's the weather going to be like?",
-    "What would you like to know that we haven’t already covered"
+    "What should I wear?",
+    "Is Parking Available?",
+    "RSVP Details",
+    "Kids & Plus Ones",
+    "What is the Indian ceremony?",
+    "Is there a gift registry?",
+    "Event schedule?",
+    "Food & Allergies",
+    "Will there be other cultural traditions?",
+    "Can I wear heels?",
+    "What’s the weather like?",
+    "Do you have hotel suggestions?",
+    "What would you like to know that we haven’t already covered?"
 ]
 
-question = st.selectbox("Choose a question:", questions)
+st.title("💍 AskTheCouple")
+st.markdown("Hi there! I’m your personal Wedding Q&A helper bot 🤖 for Ankita & Solomon’s wedding. \
+Click a question below or ask your own!")
 
-if question:
-    # Combine with your wedding FAQ content
-    with open("ankita_solomon_wedding_info.txt", "r") as f:
-        context = f.read()
+# Buttons as a radio menu
+selected = st.radio("Pick a question:", questions, index=0)
 
-    prompt = f"""
-    You are AskTheCouple — a warm, culturally-aware wedding chatbot helping guests get answers.
-    Use the context below to answer clearly and kindly:
+# Optional custom question
+st.markdown("Or ask your own:")
+custom_question = st.text_input("Type your question here:")
 
-    Context:
-    {context}
+# Determine which question to use
+final_question = custom_question if custom_question else selected
 
-    Guest question: {question}
-    Answer:
-    """
-
-    # --- Get response from OpenAI ---
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a culturally-aware, kind, wedding assistant for guests."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.5
-    )
-
-    answer = response['choices'][0]['message']['content']
-    st.markdown(f"### 💬 Answer\n{answer}")
-
-# Optional: allow users to ask a custom question
-toggle = st.checkbox("Or, ask your own question ✍️")
-if toggle:
-    user_q = st.text_input("Type your question here")
-    if user_q:
-        prompt = f"""
-        You are AskTheCouple — a warm, culturally-aware wedding chatbot.
-        Based on the following context, answer the guest's custom question.
-
-        Context:
-        {context}
-
-        Guest question: {user_q}
-        Answer:
-        """
-
+# When clicked or typed
+if final_question:
+    with st.spinner("Thinking...💭"):
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a culturally-aware, kind, wedding assistant for guests."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": (
+                        "You are AskTheCouple — a warm, helpful wedding chatbot for Ankita & Solomon’s Palo Alto wedding. "
+                        "Answer kindly, only using the info below. If you're not sure, say: 'Please check with the couple directly!'\n\n"
+                        + wedding_info
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": final_question
+                }
             ],
-            temperature=0.5
+            temperature=0.6
         )
+        st.success(response["choices"][0]["message"]["content"])
 
-        answer = response['choices'][0]['message']['content']
-        st.markdown(f"### 💬 Answer\n{answer}")
