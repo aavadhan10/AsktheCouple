@@ -1,52 +1,104 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 
-st.set_page_config(page_title="AskTheCouple 💛", page_icon="💍", layout="centered")
+# 💬 Set your OpenAI API key (from secrets.toml or environment)
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-# Load API key from secrets
-openai.api_key = st.secrets["openai"]["api_key"]
+# 💖 Wedding theme styling
+st.set_page_config(page_title="AskTheCouple 💍", page_icon="💍")
+st.markdown("""
+    <style>
+        body { background-color: #fff8f0; }
+        .stButton>button {
+            background-color: #fce4ec;
+            color: #880e4f;
+            border-radius: 25px;
+            padding: 0.4rem 1.2rem;
+            border: none;
+            font-weight: 600;
+        }
+        .stTextInput>div>div>input {
+            border-radius: 8px;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-# Full wedding info (from your message)
+# 💌 Welcome Message
+st.markdown("## 🎉 Welcome to AskTheCouple!")
+st.write("""
+Hi there, and welcome to our wedding Q&A space — just for our guests!  
+I'm your personal Wedding Helper Bot 🤖  
+Got a question about what to wear, where to park, or what this whole Puja thing is?
+
+You're in the right place — just tap a button below or ask your own 💛
+""")
+
+# 🧠 Contextual Knowledge Base (for grounding answers)
 wedding_info = """
-🗓️ EVENT SCHEDULE — SATURDAY, JUNE 21, 2025
+When should I RSVP by?
+ASAP (April 2025)
 
-📍 Location: 733 Center Drive, Palo Alto, CA 94301 (Ankita’s childhood backyard)
+What is an Indian Wedding Puja Ceremony?
+An Indian Puja Ceremony is a traditional ritual involving prayers, offerings, and chanting for blessings and prosperity. It’s our way of honoring culture and starting marriage with love. We'll have descriptions of each part of the ceremony at the Wedding.
 
-Welcome & Arrival (2:15 pm – 2:30 pm): Guests arrive. Light bites and cocktails.  
-Baraat & Refreshments (2:30 pm – 4:00 pm): Joyful groom's entrance + snacks.  
-Indian Puja Wedding Ceremony (4:00 pm – 6:00 pm): Traditional ritual with a priest, fire, chanting, offerings.  
-Dinner & Dancing (6:00 pm – 10:00 pm): Indian food, cocktails, cake, DJ & dancing!
+Is this the real wedding?
+Yes! We're doing a traditional Indian ceremony now and a big reception in 2026.
 
-👗 DRESS CODE:  
-– American Semi-Formal: Tuxes, suits, cocktail dresses  
-– Indian Semi-Formal: Sarees, lehengas, kurtas, Nehru jackets  
-🌞 Dress light, July gets hot (~90°F).  
-👠 Heels welcome — no grass!
+Is there a dress code?
+Yes:  
+American Semi-Formal (suits, cocktail dresses)  
+Indian Semi-Formal (sarees, lehengas, salwar kameez, kurtas)  
+It’ll be hot (~90°F in July), so dress light!
 
-🧒 Kids welcome  
-🎁 No registry — your presence is the gift!  
-🥘 Menu: Fully vegetarian, gluten/dairy/nut-free options available. Notify us of any allergies.  
-🚗 Parking: Forest Ave = free, Center Drive = permit-only  
-🌍 2026 will include Habesha + Western culture
+Can I wear Indian Attire?
+Yes! Inspiration:  
+- [Western](https://www.pinterest.com/kimberlygarz/semi-formal-wedding-attire/)  
+- [Indian](https://in.pinterest.com/shaadiwish/summer-wedding-outfits/)  
+- Borrow or try [saree.com]
 
-FAQs:
-– RSVP by: April 2025  
-– Indian Ceremony: A peaceful, spiritual blessing with mantras, fire, flowers, etc. Inclusive for all.  
-– This is our real wedding — legal one is separate. Reception in 2026.  
-– Can I wear Indian attire? Yes! [saree.com] ships to U.S. or borrow from Ankita.  
-– Registry? No!  
-– Can I wear heels? Yes!  
-– Plus ones? Only if invited (intimate event)  
-– Other events? Nope, just this one!  
-– Food allergies? Let us know — we’ll accommodate.  
-– Kids? Yes!  
-– Other cultures? 2026 event will be multicultural  
-– Hotel info? See ‘Travel’ tab on website  
-– Weather? Hot! Dress light and colorful.
+Are you registered?
+No — your presence is the best gift ❤️
+
+Can I Wear Heels?
+Yes! Backyard has no grass, so wear what you love.
+
+Can I bring a plus one?
+Only listed guests are invited, thank you for understanding!
+
+Any other events?
+Just this one!
+
+Food allergies?
+Yes, we accommodate! Full vegetarian menu with dairy-free, gluten-free, and nut-free options.
+
+Parking?
+Limited street parking. Forest Ave (no permit needed), Center Drive (permit required). Arrive early.
+
+Kids welcome?
+Yes! Bring your little ones.
+
+Will there be other Cultural Traditions?
+This ceremony focuses on the Indian Puja. Our 2026 party will blend Habesha and Western traditions!
+
+Hotel Recs?
+Yes — check our website for options near Palo Alto and things to do in the Bay Area.
+
+Weather?
+Hot — up to 90°F! Dress light, colors welcome.
+
+Schedule:
+- 2:15 pm: Arrival (light bites)
+- 2:30 pm: Baraat
+- 4:00 pm: Indian Puja Ceremony
+- 6:00 pm: Dinner, cake & dancing
+
+Venue:
+Ankita’s Childhood Backyard  
+733 Center Drive, Palo Alto, CA
 """
 
-# List of button questions
-questions = [
+# 💬 Common Questions
+bubble_qs = [
     "What should I wear?",
     "Is Parking Available?",
     "RSVP Details",
@@ -62,40 +114,33 @@ questions = [
     "What would you like to know that we haven’t already covered?"
 ]
 
-st.title("💍 AskTheCouple")
-st.markdown("Hi there! I’m your personal Wedding Q&A helper bot 🤖 for Ankita & Solomon’s wedding. \
-Click a question below or ask your own!")
+st.markdown("### 💬 Common Questions")
+selected = None
 
-# Buttons as a radio menu
-selected = st.radio("Pick a question:", questions, index=0)
+for i in range(0, len(bubble_qs), 3):
+    cols = st.columns(3)
+    for col, q in zip(cols, bubble_qs[i:i+3]):
+        if col.button(q):
+            selected = q
 
-# Optional custom question
-st.markdown("Or ask your own:")
-custom_question = st.text_input("Type your question here:")
+# ✏️ Custom Question
+custom_q = st.text_input("Or ask your own question:")
 
-# Determine which question to use
-final_question = custom_question if custom_question else selected
+# 🟣 Final question
+final_question = custom_q.strip() if custom_q else selected
 
-# When clicked or typed
+# 🚀 Ask OpenAI
 if final_question:
-    with st.spinner("Thinking...💭"):
-        response = openai.ChatCompletion.create(
+    with st.spinner("Thinking... 💭"):
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are AskTheCouple — a warm, helpful wedding chatbot for Ankita & Solomon’s Palo Alto wedding. "
-                        "Answer kindly, only using the info below. If you're not sure, say: 'Please check with the couple directly!'\n\n"
-                        + wedding_info
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": final_question
-                }
+                {"role": "system", "content": "You are a helpful, cheerful wedding assistant helping guests understand details about Ankita and Solomon's wedding. Be concise, warm, and informative. Use emojis occasionally."},
+                {"role": "user", "content": f"{final_question}\n\nHere is all the wedding information:\n{wedding_info}"}
             ],
             temperature=0.6
         )
-        st.success(response["choices"][0]["message"]["content"])
+
+        st.markdown("### 💡 Answer")
+        st.success(response.choices[0].message.content)
 
