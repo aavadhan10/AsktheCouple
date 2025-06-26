@@ -1,5 +1,5 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 from typing import Optional
 import time
 
@@ -164,7 +164,8 @@ def get_openai_response(prompt: str, context: str) -> Optional[str]:
             st.error("🔑 OpenAI API key not configured. Please contact the administrators.")
             return None
             
-        openai.api_key = api_key
+        # Initialize OpenAI client
+        client = OpenAI(api_key=api_key)
         
     except Exception as e:
         st.error(f"🔑 Error accessing OpenAI API key: {str(e)}")
@@ -191,7 +192,7 @@ def get_openai_response(prompt: str, context: str) -> Optional[str]:
     max_retries = 3
     for attempt in range(max_retries):
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {
@@ -206,31 +207,34 @@ def get_openai_response(prompt: str, context: str) -> Optional[str]:
                 frequency_penalty=0,
                 presence_penalty=0
             )
-            return response['choices'][0]['message']['content'].strip()
-            
-        except openai.error.RateLimitError:
-            if attempt < max_retries - 1:
-                st.warning(f"Rate limit reached. Retrying in {2 ** attempt} seconds...")
-                time.sleep(2 ** attempt)
-            else:
-                st.error("Rate limit exceeded. Please try again in a few minutes.")
-                return None
-                
-        except openai.error.InvalidRequestError as e:
-            st.error(f"Invalid request: {str(e)}")
-            return None
-            
-        except openai.error.AuthenticationError:
-            st.error("Authentication failed. Please check the API key configuration.")
-            return None
+            return response.choices[0].message.content.strip()
             
         except Exception as e:
-            if attempt < max_retries - 1:
-                st.warning(f"Error occurred. Retrying... (Attempt {attempt + 1}/{max_retries})")
-                time.sleep(1)
-            else:
-                st.error(f"Sorry, I couldn't process your question right now. Please try again later.")
+            error_message = str(e).lower()
+            
+            if "rate limit" in error_message:
+                if attempt < max_retries - 1:
+                    st.warning(f"Rate limit reached. Retrying in {2 ** attempt} seconds...")
+                    time.sleep(2 ** attempt)
+                else:
+                    st.error("Rate limit exceeded. Please try again in a few minutes.")
+                    return None
+                    
+            elif "invalid" in error_message or "bad request" in error_message:
+                st.error(f"Invalid request: {str(e)}")
                 return None
+                
+            elif "authentication" in error_message or "unauthorized" in error_message:
+                st.error("Authentication failed. Please check the API key configuration.")
+                return None
+                
+            else:
+                if attempt < max_retries - 1:
+                    st.warning(f"Error occurred. Retrying... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(1)
+                else:
+                    st.error(f"Sorry, I couldn't process your question right now. Please try again later.")
+                    return None
     
     return None
 
