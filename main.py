@@ -150,12 +150,25 @@ def get_openai_response(prompt: str, context: str) -> Optional[str]:
     """Get response from OpenAI with error handling and retry logic."""
     
     # Check if API key is configured
-    api_key = st.secrets.get("OPENAI_API_KEY")
-    if not api_key or api_key == "sk-REPLACE_THIS_WITH_YOURS":
-        st.error("🔑 OpenAI API key not configured. Please contact the administrators.")
+    try:
+        # Try different possible configurations
+        api_key = None
+        if "openai" in st.secrets and "api_key" in st.secrets["openai"]:
+            api_key = st.secrets["openai"]["api_key"]
+        elif "OPENAI_API_KEY" in st.secrets:
+            api_key = st.secrets["OPENAI_API_KEY"]
+        elif hasattr(st.secrets, 'openai') and hasattr(st.secrets.openai, 'api_key'):
+            api_key = st.secrets.openai.api_key
+            
+        if not api_key or api_key == "sk-REPLACE_THIS_WITH_YOURS":
+            st.error("🔑 OpenAI API key not configured. Please contact the administrators.")
+            return None
+            
+        openai.api_key = api_key
+        
+    except Exception as e:
+        st.error(f"🔑 Error accessing OpenAI API key: {str(e)}")
         return None
-    
-    openai.api_key = api_key
     
     full_prompt = f"""
     You are AskTheCouple — a warm, culturally-aware wedding chatbot helping guests get answers.
